@@ -1,0 +1,42 @@
+name: Daily 00850 MA5 Line Notify
+
+on:
+  schedule:
+    # 台灣時間 19:00 = UTC 11:00（台灣為 UTC+8，無日光節約時間）
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-00850-ma5
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run notifier
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_GROUP_ID: ${{ secrets.LINE_GROUP_ID }}
+          STOCK_ID: ${{ vars.STOCK_ID || '00850' }}
+          STOCK_NAME: ${{ vars.STOCK_NAME || '元大台灣ESG永續ETF' }}
+          MA_DAYS: ${{ vars.MA_DAYS || '5' }}
+          SKIP_NON_TRADING_DAYS: ${{ vars.SKIP_NON_TRADING_DAYS || '1' }}
+        run: python main.py
