@@ -2,8 +2,8 @@ name: Daily 00850 MA5 Line Notify
 
 on:
   schedule:
-    # 台灣時間 19:00 = UTC 11:00（台灣為 UTC+8，無日光節約時間）
-    - cron: '0 11 * * *'
+    # 台灣時間 18:37 = UTC 10:37（台灣為 UTC+8，無日光節約時間）
+    - cron: '37 10 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -15,15 +15,15 @@ concurrency:
 
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
