@@ -152,11 +152,12 @@ def main():
         rows = fetch_daily_prices()
         latest_date, close, ma, used_days = compute_ma(rows)
 
-        # 週六日或國定假日：FinMind 最新交易日會停留在上一個交易日；
-        # 若「最新交易日」與「今天」不同，代表今天沒有新行情，略過推播，避免重複發送。
-        today_str = datetime.now(TW_TZ).strftime("%Y-%m-%d")
-        if SKIP_NON_TRADING_DAYS and latest_date != today_str:
-            print(f"⏭️ 今天（{today_str}）尚無新收盤資料（最新交易日：{latest_date}），略過推播。")
+# 只在週六、週日略過推播，避免重複發送週五的訊息。
+        # 不用「最新交易日 == 今天」判斷，因為 GitHub 排程常延遲到隔天凌晨，
+        # 那時「今天」已換日，會誤判成非交易日而略過，導致每天都不發訊息。
+        weekday = datetime.now(TW_TZ).weekday()  # 0=週一 ... 5=週六 6=週日
+        if SKIP_NON_TRADING_DAYS and weekday >= 5:
+            print(f"⏭️ 今天是週{'六' if weekday == 5 else '日'}，台股休市，略過推播。")
             return
 
         message = build_message(latest_date, close, ma, used_days)
